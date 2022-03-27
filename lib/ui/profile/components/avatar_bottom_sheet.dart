@@ -1,6 +1,5 @@
 import 'package:anime_history/provider/user_provider.dart';
 import 'package:anime_history/utils.dart';
-import 'package:anime_history/widgets/load_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +23,7 @@ class AvatarBottomSheet extends StatelessWidget {
             leading: const Icon(Icons.photo, color: Colors.black,),
             title: const Text("Choose from gallery"),
             onTap: () async {
-              showDialog(context: context, builder: (context) => const LoadPopup());
+              showLoad(context);
               await user.uploadPhotoFromGallery();
               Navigator.pop(context);
               Navigator.pop(context);
