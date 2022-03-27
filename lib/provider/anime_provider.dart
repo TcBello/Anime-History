@@ -37,6 +37,7 @@ class AnimeProvider extends ChangeNotifier{
   StreamController<List<AnimeModel>>? _recommendationController;
   StreamController<List<AnimeModel>>? _seasonNowController;
   StreamController<List<AnimeModel>>? _seasonUpcomingController;
+  StreamController<bool>? _isAlreadyOnHistoryController;
 
   // STREAMS
   Stream<List<AnimeHistoryModel>> get allHistoryStream => _animeHistoryController!.stream;
@@ -44,35 +45,62 @@ class AnimeProvider extends ChangeNotifier{
   Stream<List<AnimeModel>> get recommendationStream => _recommendationController!.stream;
   Stream<List<AnimeModel>> get seasonNowStream => _seasonNowController!.stream;
   Stream<List<AnimeModel>> get seasonUpcomingStream => _seasonUpcomingController!.stream;
+  Stream<bool> get isAlreadyOnHistoryStream => _isAlreadyOnHistoryController!.stream;
 
   Future<List<AnimeModel>> search(String title) async {
-    // GET DATA FROM SERVER
-    var res = await http.get(Uri.parse(searchUrl(title)));
+    try{
+      // GET DATA FROM SERVER
+      var res = await http.get(Uri.parse(searchUrl(title)));
 
-    // DECODE JSON
-    var parsedData = jsonDecode(res.body);
-    List result = parsedData['data'];
-    List<AnimeModel> animeList = [];
+      // DECODE JSON
+      var parsedData = jsonDecode(res.body);
+      List result = parsedData['data'];
+      List<AnimeModel> animeList = [];
 
-    // ADDING LIST BY LOOPING
-    for (Map<String, dynamic> json in result){
-      animeList.add(AnimeModel.fromJSON(json));
+      // ADDING LIST BY LOOPING
+      for (Map<String, dynamic> json in result){
+        animeList.add(AnimeModel.fromJSON(json));
+      }
+
+      return animeList;
     }
-
-    return animeList;
+    catch(e){
+      showShortToast(kCommonErrorMessage);
+      return [];
+    }
   }
 
   Future<FullAnimeModel> getDetails(int id) async {
-    // GET DATA FROM SERVER
-    var res = await http.get(Uri.parse(fullDetailUrl(id)));
+    try{
+      // GET DATA FROM SERVER
+      var res = await http.get(Uri.parse(fullDetailUrl(id)));
 
-    // DECODE JSON
-    var parsedData = jsonDecode(res.body);
+      // DECODE JSON
+      var parsedData = jsonDecode(res.body);
 
-    return FullAnimeModel.fromJSON(parsedData['data']);
+      return FullAnimeModel.fromJSON(parsedData['data']);
+    }
+    catch(e){
+      showShortToast(kCommonErrorMessage);
+      return FullAnimeModel.fromJSON({});
+    }
   }
 
-  void addToHistory(int id, String userId, String url, String image, String title, String titleJapanese, String? titleEnglish, List<String> titleSynonyms, String status,
+  // INIT ANIME HISTORY STATUS
+  void initAnimeHistoryStatus(int animeId, String userId){
+    _isAlreadyOnHistoryController = BehaviorSubject<bool>();
+    
+    // GET ANIME HISTORY STATUS RESOURCES
+    getAnimeHistoryStatus(animeId, userId);
+  }
+
+  // DISPOSE ANIME HISTORY STATUS
+  void disposeAnimeHistoryStatus(){
+    _isAlreadyOnHistoryController?.close();
+    _isAlreadyOnHistoryController = null;
+  }
+
+  Future<void> addToHistory(int id, String userId, String url, String image, String title, String titleJapanese, String? titleEnglish, List<String> titleSynonyms, String status,
     String duration, int? rank, bool airing, String synopsis, String source, String type, String episodes, List<DetailModel> producers,
     List<DetailModel> studios, List<DetailModel> licensors, List<DetailModel> genres, double? rating, String? startDate, String? endDate, String? rated,) async {
 
@@ -152,82 +180,113 @@ class AnimeProvider extends ChangeNotifier{
       'rated': rated,
     };
 
-    // POST TO SERVER
-    var res = await http.post(
-      Uri.parse(kAddAnimeUrl),
-      headers: jsonHeaderWithToken(pref.getString('token')),
-      body: jsonEncode(data)
-    );
+    try{
+      // POST TO SERVER
+      var res = await http.post(
+        Uri.parse(kAddAnimeUrl),
+        headers: jsonHeaderWithToken(pref.getString('token')),
+        body: jsonEncode(data)
+      );
 
-    var parsedData = jsonDecode(res.body);
+      var parsedData = jsonDecode(res.body);
 
-    if(res.statusCode != 200){
-      showShortToast(parsedData['message']);
+      if(res.statusCode != 200){
+        showShortToast(parsedData['message']);
+      }
+      else{
+        // ADD DATA TO THE ANIME HISTORY STREAM
+        _animeHistories.add(AnimeHistoryModel(
+          id: id,
+          image: image,
+          title: title
+        ));
+        _animeHistoryController?.sink.add(_animeHistories);
+
+        // ADD DATA TO THE ANIME HISTORY STATUS STREAM
+        _isAlreadyOnHistoryController?.sink.add(true);
+      }
     }
-    else{
-      // ADD DATA TO THE ANIME HISTORY STREAM
-      _animeHistories.add(AnimeHistoryModel(
-        id: id,
-        image: image,
-        title: title
-      ));
-      _animeHistoryController?.sink.add(_animeHistories);
-    }
-  }
-
-  Stream<bool> isAlreadyOnHistoryStream(int animeId, String userId) async* {
-    // POST TO SERVER
-    var res = await http.post(
-      Uri.parse(kVerifyAnimeHistoryUrl),
-      headers: kJsonHeader,
-      body: jsonEncode({
-        'id': animeId,
-        'userId': userId
-      })
-    );
-
-    if(res.statusCode == 200){
-      yield true;
-    }
-    else{
-      yield false;
+    catch(e){
+      showShortToast(kCommonErrorMessage);
     }
   }
 
-  void removeFromHistory(int id) async {
+  void getAnimeHistoryStatus(int animeId, String userId) async{
+    try{
+      // POST TO SERVER
+      var res = await http.post(
+        Uri.parse(kVerifyAnimeHistoryUrl),
+        headers: kJsonHeader,
+        body: jsonEncode({
+          'id': animeId,
+          'userId': userId
+        })
+      );
+
+      if(res.statusCode == 200){
+        // ADD DATA ON IS ALREADY ON HISTORY STREAM
+        _isAlreadyOnHistoryController?.sink.add(true);
+      }
+      else if(res.statusCode == 400){
+        // ADD DATA ON IS ALREADY ON HISTORY STREAM
+        _isAlreadyOnHistoryController?.sink.add(false);
+      }
+      else{
+        showShortToast(kCommonErrorMessage);
+      }
+    }
+    catch(e){
+      showShortToast(kCommonErrorMessage);
+    }
+  }
+
+  Future<void> removeFromHistory(int id) async {
     var pref = await SharedPreferences.getInstance();
 
-    // DELETE REQUEST TO SERVER
-    var res = await http.delete(
-      Uri.parse(kDeleteAnimeUrl),
-      headers: jsonHeaderWithToken(pref.getString('token') ?? ""),
-      body: jsonEncode({'id': id})
-    );
+    try{
+      // DELETE REQUEST TO SERVER
+      var res = await http.delete(
+        Uri.parse(kDeleteAnimeUrl),
+        headers: jsonHeaderWithToken(pref.getString('token') ?? ""),
+        body: jsonEncode({'id': id})
+      );
 
-    if(res.statusCode != 200){
-      showShortToast("Something went wrong. Please try again!");
+      if(res.statusCode != 200){
+        showShortToast(kCommonErrorMessage);
+      }
+      else{
+        // REMOVE DATA FROM ANIME HISTORY STREAM
+        _animeHistories.removeWhere((element) => element.id == id);
+        _animeHistoryController?.add(_animeHistories);
+
+        // REMOVE DATA FROM ANIME HISTORY STATUS STREAM
+        _isAlreadyOnHistoryController?.sink.add(false);
+      }
     }
-    else{
-      // REMOVE DATA FROM ANIME HISTORY STREAM
-      _animeHistories.removeWhere((element) => element.id == id);
-      _animeHistoryController?.add(_animeHistories);
+    catch(e){
+      showShortToast(kCommonErrorMessage);
     }
   }
 
   void getAllHistory(String userId) async {
-    // GET FROM SERVER
-    var res = await http.get(
-      Uri.parse(kAllAnimeHistoryUrl),
-      headers: {'request-user-id': userId}
-    );
+    try{
+      // GET FROM SERVER
+      var res = await http.get(
+        Uri.parse(kAllAnimeHistoryUrl),
+        headers: {'request-user-id': userId}
+      );
 
-    var parsedData = jsonDecode(res.body);
-    List anime = parsedData['data'];
+      var parsedData = jsonDecode(res.body);
+      List anime = parsedData['data'];
 
-    if(res.statusCode == 200){
-      // ADD DATA TO THE ANIME HISTORY STREAM
-      _animeHistories = anime.map((e) => AnimeHistoryModel.fromJSON(e)).toList();
-      _animeHistoryController?.sink.add(_animeHistories);
+      if(res.statusCode == 200){
+        // ADD DATA TO THE ANIME HISTORY STREAM
+        _animeHistories = anime.map((e) => AnimeHistoryModel.fromJSON(e)).toList();
+        _animeHistoryController?.sink.add(_animeHistories);
+      }
+    }
+    catch(e){
+      showShortToast(kCommonErrorMessage);
     }
   }
 

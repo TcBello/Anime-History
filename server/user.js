@@ -1,20 +1,7 @@
 const User = require("./models/user_model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
-
-
-// MULTER'S STORAGE CONFIGURATION FOR BETTER CONTROL OF UPLOADING FILE IN THE SERVER
-const storage = multer.diskStorage({
-    destination: function(req, file, cb){
-        cb(null, "uploads/avatars");
-    },
-    filename: function(req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
-
-const upload = multer({storage: storage}).single("photo");
+const cloudinary = require('cloudinary');
 
 // SIGN UP
 async function signUp(req, res){
@@ -157,28 +144,33 @@ async function authUser(req, res){
     }
 }
 
+// UPLOAD PHOTO TO CLOUDINARY
 function uploadPhoto(req, res){
-    upload(req, res, async (error) => {
-        if(!error){
-            // FINDING EXISTING USER'S ID
-            let user = await User.findById(req.body['user_id']);
-
-            if(user){
-                // ASSIGN A NEW IMAGE PATH
-                user.image = `uploads/avatars/${req.file.filename}`;
-
-                await user.save();
-                return res.status(200).json({message: "Uploaded successfully", data: user.image});
+    cloudinary.v2.uploader.upload(
+        `data:image/jpeg;base64,${req.body.image_base64}`,
+        {folder: "Avatars"},
+        async function(error, result){
+            if(!error){
+                // FINDING EXISTING USER'S ID
+                let user = await User.findById(req.body['user_id']);
+    
+                if(user){
+                    // ASSIGN A NEW IMAGE PATH
+                    user.image = result.secure_url;
+    
+                    await user.save();
+                    return res.status(200).json({message: "Uploaded successfully", data: user.image});
+                }
+                else{
+                    return res.status(400).json({message: "Can't find the current user"});
+                }
             }
             else{
-                return res.status(400).json({message: "Can't find the current user"});
+                console.log(error);
+                return res.status(500).json({message: "Something went wrong on uploading image"});
             }
         }
-        else{
-            console.log(error);
-            return res.status(500).json({message: "Something went wrong on uploading image"});
-        }
-    });
+    );
 }
 
 module.exports.signUp = signUp;

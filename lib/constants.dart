@@ -31,3 +31,6 @@ const Map<String, String> kJsonHeader = {
   'Content-type': 'application/json',
   'Accept': 'application/json'
 }; 
+
+// COMMON ERROR MESSAGE
+const String kCommonErrorMessage = "Something went wrong. Please try again later!";

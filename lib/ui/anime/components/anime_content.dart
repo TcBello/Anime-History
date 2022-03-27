@@ -7,11 +7,12 @@ import 'package:anime_history/ui/anime/components/anime_rich_text.dart';
 import 'package:anime_history/ui/anime/components/anime_simple_wrap.dart';
 import 'package:anime_history/ui/anime/components/anime_wrap.dart';
 import 'package:anime_history/ui/anime/components/detail.dart';
+import 'package:anime_history/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 
-class AnimeContent extends StatelessWidget {
+class AnimeContent extends StatefulWidget {
   const AnimeContent({
     Key? key,
     required this.size,
@@ -68,19 +69,44 @@ class AnimeContent extends StatelessWidget {
   static const double _kWrapSpacing = 5;
 
   @override
+  State<AnimeContent> createState() => _AnimeContentState();
+}
+
+class _AnimeContentState extends State<AnimeContent> {
+  AnimeProvider? animeProvider;
+
+  @override
+  void initState() {
+    animeProvider = context.read<AnimeProvider>();
+    var userProvider = context.read<UserProvider>();
+    animeProvider?.initAnimeHistoryStatus(widget.id, userProvider.id);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    animeProvider?.disposeAnimeHistoryStatus();
+    animeProvider = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final parsedStartDate = startDate != null
-      ? Jiffy(startDate ?? "").yMMMd
+    final anime = context.read<AnimeProvider>();
+    final user = context.read<UserProvider>();
+    
+    final parsedStartDate = widget.startDate != null
+      ? Jiffy(widget.startDate ?? "").yMMMd
       : "";
-    final parsedEndDate = endDate != null
-      ? Jiffy(endDate ?? "").yMMMd
+    final parsedEndDate = widget.endDate != null
+      ? Jiffy(widget.endDate ?? "").yMMMd
       : "";
 
     return SingleChildScrollView(
       child: Container(
-        margin: EdgeInsets.only(top: size.height * 0.42),
+        margin: EdgeInsets.only(top: widget.size.height * 0.42),
         padding: const EdgeInsets.only(top: 30, bottom: 10),
-        width: size.width,
+        width: widget.size.width,
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -101,10 +127,10 @@ class AnimeContent extends StatelessWidget {
               Align(
                 alignment: Alignment.center,
                 child: Container(
-                  width: size.width * 0.8,
+                  width: widget.size.width * 0.8,
                   child: Center(
                     child: Text(
-                      title,
+                      widget.title,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headline6,
                     ),
@@ -122,19 +148,19 @@ class AnimeContent extends StatelessWidget {
               // TITLE SYNONYMS
               Detail(
                 child: AnimeSimpleWrap(
-                  spacing: _kWrapSpacing,
-                  list: titleSynonyms,
-                  size: size,
+                  spacing: AnimeContent._kWrapSpacing,
+                  list: widget.titleSynonyms,
+                  size: widget.size,
                   title: "Synonyms",
                 )
               ),
               // TITLE JAPANESE
               Detail(
-                child: AnimeRichText(title: "Japanese", content: titleJapanese)
+                child: AnimeRichText(title: "Japanese", content: widget.titleJapanese)
               ),
               // TITLE ENGLISH
               Detail(
-                child: AnimeRichText(title: "English", content: titleEnglish ?? "")
+                child: AnimeRichText(title: "English", content: widget.titleEnglish ?? "")
               ),
               // INFORMATION HEADER
               Detail(
@@ -146,23 +172,23 @@ class AnimeContent extends StatelessWidget {
               ),
               // RATING
               Detail(
-                child: AnimeRichText(title: "Rating", content: rating.toString()),
+                child: AnimeRichText(title: "Rating", content: widget.rating.toString()),
               ),
               // RANK
               Detail(
-                child: AnimeRichText(title: "Rank", content: "#$rank"),
+                child: AnimeRichText(title: "Rank", content: "#${widget.rank}"),
               ),
               // TYPE
               Detail(
-                child: AnimeRichText(title: "Type", content: type),
+                child: AnimeRichText(title: "Type", content: widget.type),
               ),
               // EPISODES
               Detail(
-                child: AnimeRichText(title: "Episodes", content: episodes),
+                child: AnimeRichText(title: "Episodes", content: widget.episodes),
               ),
               // STATUS
               Detail(
-                child: AnimeRichText(title: "Status", content: status),
+                child: AnimeRichText(title: "Status", content: widget.status),
               ),
               // DATE AIRED (START DATE - END DATE)
               Detail(
@@ -171,117 +197,121 @@ class AnimeContent extends StatelessWidget {
               // PRODUCERS
               Detail(
                 child: AnimeWrap(
-                  spacing: _kWrapSpacing,
-                  detailModelList: producers,
+                  spacing: AnimeContent._kWrapSpacing,
+                  detailModelList: widget.producers,
                   title: "Producers",
-                  size: size
+                  size: widget.size
                 ),
               ),
               // LICENSORS
               Detail(
                 child: AnimeWrap(
-                  spacing: _kWrapSpacing,
-                  detailModelList: licensors,
+                  spacing: AnimeContent._kWrapSpacing,
+                  detailModelList: widget.licensors,
                   title: "Licensors",
-                  size: size
+                  size: widget.size
                 ),
               ),
               // STUDIOS
               Detail(
                 child: AnimeWrap(
-                  spacing: _kWrapSpacing,
-                  detailModelList: studios,
+                  spacing: AnimeContent._kWrapSpacing,
+                  detailModelList: widget.studios,
                   title: "Studios",
-                  size: size
+                  size: widget.size
                 ),
               ),
               // SOURCE
               Detail(
-                child: AnimeRichText(title: "Source", content: source),
+                child: AnimeRichText(title: "Source", content: widget.source),
               ),
               // GENRE
               Detail(
                 child: AnimeWrap(
-                  spacing: _kWrapSpacing,
-                  detailModelList: genres,
+                  spacing: AnimeContent._kWrapSpacing,
+                  detailModelList: widget.genres,
                   title: "Genres",
-                  size: size
+                  size: widget.size
                 ),
               ),
               // DURATION
               Detail(
-                child: AnimeRichText(title: "Duration", content: duration),
+                child: AnimeRichText(title: "Duration", content: widget.duration),
               ),
               // RATED
               Detail(
-                child: AnimeRichText(title: "Rated", content: rated ?? ""),
+                child: AnimeRichText(title: "Rated", content: widget.rated ?? ""),
               ),
               // SUMMARY
               Detail(
                 child: Text("Summary:", style: Theme.of(context).textTheme.bodyText1,),
               ),
               Detail(
-                child: Text("       $synopsis", style: Theme.of(context).textTheme.bodyText2?.copyWith(
+                child: Text("       ${widget.synopsis}", style: Theme.of(context).textTheme.bodyText2?.copyWith(
                   height: 1.5
                 ),),
               ),
               // ADD TO HISTORY BUTTON
-              Consumer2<AnimeProvider, UserProvider>(
-                builder: (context, anime, user, child) {
-                  return Align(
-                    alignment: Alignment.center,
-                    child: Detail(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: StreamBuilder<bool>(
-                        stream: anime.isAlreadyOnHistoryStream(id, user.id),
-                        builder: (context, snapshot) {
-                          if(snapshot.hasData){
-                            if(!snapshot.data!){
-                              return SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height: 50,
-                                child: TextButton(
-                                  child: const Text("ADD TO HISTORY"),
-                                  onPressed: () => anime.addToHistory(id, user.id, url, image, title, titleJapanese, titleEnglish, titleSynonyms, status, duration, rank, airing, synopsis, source, type, episodes, producers, studios, licensors, genres, rating, startDate, endDate, rated),
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(Colors.blue),
-                                    foregroundColor: MaterialStateProperty.all(Colors.white),
-                                    textStyle: MaterialStateProperty.all(Theme.of(context).textTheme.button?.copyWith(fontSize: 16)),
-                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))
-                                  ),
-                                ),
-                              );
-                            }
-                            else{
-                              return SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height: 50,
-                                child: TextButton(
-                                  child: const Text("REMOVE FROM HISTORY"),
-                                  onPressed: () => anime.removeFromHistory(id),
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(Colors.red),
-                                    foregroundColor: MaterialStateProperty.all(Colors.white),
-                                    textStyle: MaterialStateProperty.all(Theme.of(context).textTheme.button?.copyWith(fontSize: 16)),
-                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                          else{
-                            // LOADING
-                            return const SizedBox(
-                              height: 25,
-                              width: 25,
-                              child: CircularProgressIndicator(),
-                            );
-                          }
+              Align(
+                alignment: Alignment.center,
+                child: Detail(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: StreamBuilder<bool>(
+                    stream: anime.isAlreadyOnHistoryStream,
+                    builder: (context, snapshot) {
+                      if(snapshot.hasData){
+                        if(!snapshot.data!){
+                          return SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: 50,
+                            child: TextButton(
+                              child: const Text("ADD TO HISTORY"),
+                              onPressed: () async {
+                                showLoad(context);
+                                await anime.addToHistory(widget.id, user.id, widget.url, widget.image, widget.title, widget.titleJapanese, widget.titleEnglish, widget.titleSynonyms, widget.status, widget.duration, widget.rank, widget.airing, widget.synopsis, widget.source, widget.type, widget.episodes, widget.producers, widget.studios, widget.licensors, widget.genres, widget.rating, widget.startDate, widget.endDate, widget.rated);
+                                Navigator.pop(context);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Colors.blue),
+                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                                textStyle: MaterialStateProperty.all(Theme.of(context).textTheme.button?.copyWith(fontSize: 16)),
+                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))
+                              ),
+                            ),
+                          );
                         }
-                      ),
-                    ),
-                  );
-                }
+                        else{
+                          return SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: 50,
+                            child: TextButton(
+                              child: const Text("REMOVE FROM HISTORY"),
+                              onPressed: () async {
+                                showLoad(context);
+                                await anime.removeFromHistory(widget.id);
+                                Navigator.pop(context);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Colors.red),
+                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                                textStyle: MaterialStateProperty.all(Theme.of(context).textTheme.button?.copyWith(fontSize: 16)),
+                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                      else{
+                        // LOADING
+                        return const SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    }
+                  ),
+                ),
               )
             ],
           ),

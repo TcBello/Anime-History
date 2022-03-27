@@ -3,11 +3,18 @@ const mongoose = require("mongoose");
 const User = require("./user");
 const Anime = require("./anime");
 const auth = require("./middleware/auth");
+const cloudinary = require("cloudinary");
 
 require("dotenv").config();
 
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.CLOUD_KEY, 
+    api_secret: process.env.CLOUD_SECRET
+});
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 5000;
 
 module.exports = app;
 
@@ -24,7 +31,7 @@ async function connectDB(){
 connectDB();
 
 // MIDDLEWARE FOR JSON EXTRACTION
-app.use(express.json());
+app.use(express.json({limit: "50mb"}));
 
 // MIDDLEWARE FOR ACCESS ON 'UPLOADS' FOLDER
 app.use("/uploads/avatars", express.static(__dirname + "/uploads/avatars"));
@@ -35,6 +42,7 @@ app.listen(port, () => {
 });
 
 // USER ROUTES
+app.get("/", (req, res) =>{return res.send("<h1>Welcome to Server!</h1>")}); // MAIN ROUTE
 app.post("/user/signup", User.signUp); // SIGN UP
 app.post("/user/login", User.login); // LOGIN
 app.get("/user/authenticate", User.authUser); // AUTHENTICATION

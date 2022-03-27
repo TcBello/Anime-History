@@ -1,4 +1,5 @@
 import 'package:anime_history/provider/user_provider.dart';
+import 'package:anime_history/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -42,8 +43,16 @@ class _UpdatePasswordState extends State<UpdatePassword> {
             child: Text("Apply", style: Theme.of(context).textTheme.headline6?.copyWith(color: Colors.white),),
             onPressed: () async {
               if(formKey.currentState!.validate()){
+                showLoad(context);
                 var isSuccess = await user.updatePassword(currentPasswordController.text, newPasswordController.text);
-                if(isSuccess) Navigator.pop(context);
+                
+                if(isSuccess){
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                }
+                else{
+                  Navigator.pop(context);
+                }
               }
             },
             style: ButtonStyle(
@@ -117,7 +126,9 @@ class _UpdatePasswordState extends State<UpdatePassword> {
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
                         onPressed: () {
-                          obscureNewPassword = !obscureNewPassword;
+                          setState(() {
+                            obscureNewPassword = !obscureNewPassword;
+                          });
                         },
                       ),
                       border: OutlineInputBorder(

@@ -1,4 +1,6 @@
 import 'package:anime_history/constants.dart';
+import 'package:anime_history/widgets/load_popup.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 String searchUrl(String title, {String page = "1"}) => "$kBaseApi/anime?q=$title";
@@ -13,8 +15,6 @@ String seasonNowUrl() => "$kBaseApi/seasons/now";
 
 String seasonUpcomingUrl() => "$kBaseApi/seasons/upcoming";
 
-String avatarUrl(String imagePath) => "http://$heroku/$imagePath";
-
 // SHOW A SHORT TOAST
 void showShortToast(String msg) async{
   await Fluttertoast.cancel();
@@ -26,4 +26,13 @@ Map<String, String> jsonHeaderWithToken(String? token) => {
   'Content-type': 'application/json',
   'Accept': 'application/json',
   'authorization': token ?? ""
-  }; 
+};
+
+// SHOW LOAD POPUP
+void showLoad(BuildContext context){
+  showDialog(
+    context: context,
+    builder: (context) => const LoadPopup(),
+    barrierDismissible: false
+  );
+}

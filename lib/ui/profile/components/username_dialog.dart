@@ -1,4 +1,5 @@
 import 'package:anime_history/provider/user_provider.dart';
+import 'package:anime_history/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -51,8 +52,16 @@ class _UsernameDialogState extends State<UsernameDialog> {
           child: const Text("APPLY"),
           onPressed: () async {
             if(formKey.currentState!.validate()){
+              showLoad(context);
               var isSuccess = await user.updateUsername(usernameController.text);
-              if(isSuccess) Navigator.pop(context);
+
+              if(isSuccess){
+                Navigator.pop(context);
+                Navigator.pop(context);
+              }
+              else{
+                Navigator.pop(context);
+              }
             }
           },
         )

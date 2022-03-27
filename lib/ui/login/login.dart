@@ -3,6 +3,7 @@
 import 'package:anime_history/constants.dart';
 import 'package:anime_history/provider/user_provider.dart';
 import 'package:anime_history/ui/sign_up/sign_up.dart';
+import 'package:anime_history/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -147,8 +148,12 @@ class _LoginState extends State<Login> {
                             width: MediaQuery.of(context).size.width,
                             child: TextButton(
                               child: const Text("LOGIN"),
-                              onPressed: (){
-                                if(formKey.currentState!.validate()) user.login(emailController.text, passwordController.text);
+                              onPressed: () async {
+                                if(formKey.currentState!.validate()){
+                                  showLoad(context);
+                                  await user.login(emailController.text, passwordController.text);
+                                  Navigator.pop(context);
+                                }
                               },
                               style: ButtonStyle(
                                   backgroundColor:
