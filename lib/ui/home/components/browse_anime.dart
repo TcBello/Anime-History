@@ -1,4 +1,5 @@
 import 'package:anime_history/provider/anime_provider.dart';
+import 'package:anime_history/provider/user_provider.dart';
 import 'package:anime_history/ui/home/components/browse_header.dart';
 import 'package:anime_history/ui/home/components/future_anime_browse_content.dart';
 import 'package:anime_history/ui/home/components/view_all_anime.dart';
@@ -20,12 +21,23 @@ class BrowseAnime extends StatelessWidget {
         // PROFILE BUTTON
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
-          child: MaterialButton(
-            padding: EdgeInsets.zero,
-            shape: const CircleBorder(),
-            color: Colors.white,
-            child: const Icon(Icons.person),
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const Profile()))
+          child: Consumer<UserProvider>(
+            builder: (context, user, child) {
+              // PROFILE BUTTON
+              return MaterialButton(
+                padding: EdgeInsets.zero,
+                child: CircleAvatar(
+                  backgroundImage: user.avatar != null
+                    ? NetworkImage(user.avatar!)
+                    : null,
+                  backgroundColor: Colors.white,
+                  child: user.avatar == null
+                    ? const Icon(Icons.person, color: Colors.black,)
+                    : null,
+                ),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const Profile()))
+              );
+            }
           ),
         ),
         actions: [
