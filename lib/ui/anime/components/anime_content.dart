@@ -192,7 +192,7 @@ class _AnimeContentState extends State<AnimeContent> {
               ),
               // DATE AIRED (START DATE - END DATE)
               Detail(
-                child: AnimeRichText(title: "Rating", content: "$parsedStartDate - $parsedEndDate"),
+                child: AnimeRichText(title: "Date Aired", content: "$parsedStartDate - $parsedEndDate"),
               ),
               // PRODUCERS
               Detail(
