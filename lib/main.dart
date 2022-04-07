@@ -32,7 +32,7 @@ class App extends StatelessWidget {
             fontSize: 16,
           ),
           loadingTextPadding: EdgeInsets.zero,
-          seconds: 5,
+          seconds: 3,
           title: Text("Anime History", style: Theme.of(context).textTheme.headline4?.copyWith(color: Colors.white),),
           loadingText: Text("TcBello", style: Theme.of(context).textTheme.headline6?.copyWith(color: Colors.white, fontStyle: FontStyle.italic),),
           navigateAfterSeconds: const AuthWrapper(beforeAuth: Login(), afterAuth: Home()),
