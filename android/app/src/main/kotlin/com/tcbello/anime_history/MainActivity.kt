@@ -1,4 +1,4 @@
-package com.example.anime_history
+package com.tcbello.anime_history
 
 import io.flutter.embedding.android.FlutterActivity
 
