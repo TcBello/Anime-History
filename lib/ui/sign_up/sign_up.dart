@@ -26,6 +26,8 @@ class _SignUpState extends State<SignUp> {
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
 
+  double imageSize = 150;
+
   @override
   void dispose() {
     usernameController.dispose();
@@ -73,9 +75,14 @@ class _SignUpState extends State<SignUp> {
                       const SizedBox(height: 80),
                       // APP LOGO
                       Container(
-                        height: 150,
-                        width: 150,
-                        color: Colors.blue,
+                        height: imageSize,
+                        width: imageSize,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: const Image(
+                            image: ResizeImage(AssetImage(kAppIconImagePath), width: 400, height: 400),
+                          ),
+                        )
                       ),
                       const SizedBox(height: 50),
                       // USERNAME TEXT FIELD
