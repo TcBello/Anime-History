@@ -28,6 +28,6 @@ Anime History is a Mobile App that you can browse animes and add them as your wa
     <tr>
         <td><img src="https://github.com/TcBello/Anime-History/blob/main/screenshot/sc_4.jpg" height="400"></td>
         <td><img src="https://github.com/TcBello/Anime-History/blob/main/screenshot/sc_5.jpg" height="400"></td>
-        <td><img src="https://github.com/TcBello/Anime-History/blob/main/screenshot/sc_6.jpgs" height="400"></td>
+        <td><img src="https://github.com/TcBello/Anime-History/blob/main/screenshot/sc_6.jpg" height="400"></td>
     </tr>
 </table>
