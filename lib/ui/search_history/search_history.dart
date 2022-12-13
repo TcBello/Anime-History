@@ -58,4 +58,7 @@ class SearchHistory extends SearchDelegate{
       focusedErrorBorder: InputBorder.none,
     );
   }
+
+  @override
+  String? get searchFieldLabel => "Search History";
 }

@@ -58,4 +58,7 @@ class Search extends SearchDelegate{
       focusedErrorBorder: InputBorder.none,
     );
   }
+
+  @override
+  String? get searchFieldLabel => "Search Anime";
 }
