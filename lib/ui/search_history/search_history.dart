@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 class SearchHistory extends SearchDelegate{
   @override
   List<Widget>? buildActions(BuildContext context) {
+    return null;
   }
 
   @override
   Widget? buildLeading(BuildContext context) {
+    return null;
   }
 
   @override
@@ -40,7 +42,7 @@ class SearchHistory extends SearchDelegate{
           color: Colors.white,
           fontSize: 20
         )
-      )
+      ),
     );
     return theme;
   }

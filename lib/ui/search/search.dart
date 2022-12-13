@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 class Search extends SearchDelegate{
   @override
   List<Widget>? buildActions(BuildContext context) {
+    return null;
   }
 
   @override
   Widget? buildLeading(BuildContext context) {
+    return null;
   }
 
   @override
